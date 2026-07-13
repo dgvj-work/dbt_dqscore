@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  integration-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dbt with DuckDB adapter
+        run: pip install "dbt-duckdb>=1.7"
+
+      - name: Seed + happy/negative path tests
+        working-directory: integration_tests
+        env:
+          DBT_PROFILES_DIR: .
+        run: |
+          set -euo pipefail
+          dbt deps
+          dbt seed --full-refresh
+          # First pass writes dqscore_* tables via on-run-end.
+          # Exclude scoring assertions — they read those tables afterwards.
+          dbt test --exclude tag:assert_scoring 2>&1 | tee /tmp/dbt_test.log
+          grep -E 'dqscore: quality score [0-9]+\.[0-9]+/100' /tmp/dbt_test.log
+
+      - name: Assert scoring tables and weighted math
+        working-directory: integration_tests
+        env:
+          DBT_PROFILES_DIR: .
+        # Disable the hook so this pass does not overwrite the happy-path scores.
+        run: dbt test --select tag:assert_scoring --vars '{dqscore: {enabled: false}}'

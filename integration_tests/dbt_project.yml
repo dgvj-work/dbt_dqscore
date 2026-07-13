@@ -1,0 +1,21 @@
+name: 'dbt_dqscore_integration_tests'
+version: '0.1.0'
+config-version: 2
+
+profile: 'dbt_dqscore_integration_tests'
+
+seed-paths: ["seeds"]
+model-paths: ["models"]
+test-paths: ["tests"]
+
+require-dbt-version: [">=1.3.0", "<3.0.0"]
+
+vars:
+  dqscore:
+    retention_days: 30
+    default_weight: 1
+    # fail_below deliberately below the expected score so CI passes:
+    fail_below: 50
+
+on-run-end:
+  - "{{ dbt_dqscore.store_test_results(results) }}"

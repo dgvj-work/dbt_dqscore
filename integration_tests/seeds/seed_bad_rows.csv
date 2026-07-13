@@ -1,0 +1,3 @@
+row_id,email,age,country,amount_text,left_ts,right_ts,status
+1,not-an-email,999,XX,abc,2026-01-10,2026-01-01,bad
+2,bad@nox,-5,ZZ,12.x,2026-02-01,2026-01-15,bad

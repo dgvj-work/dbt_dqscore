@@ -1,0 +1,214 @@
+version: 2
+
+seeds:
+  - name: seed_customers
+    tests:
+      - dbt_dqscore.no_duplicate_rows
+      - dbt_dqscore.row_count_between:
+          min_value: 1
+          max_value: 1000
+      - dbt_dqscore.row_count_equal:
+          value: 8
+      - dbt_dqscore.column_count_equal:
+          value: 7
+      - dbt_dqscore.equal_row_count:
+          compare_model: ref('seed_customers')
+      - dbt_dqscore.expression_is_true:
+          expression: "lifetime_value >= 0"
+    columns:
+      - name: customer_id
+        tests:
+          - dbt_dqscore.not_null_proportion:
+              at_least: 1.0
+          - dbt_dqscore.unique_proportion:
+              at_least: 1.0
+              config:
+                meta:
+                  dqscore_weight: 10
+          - dbt_dqscore.sequential_values:
+              interval: 1
+          - dbt_dqscore.distinct_count_between:
+              min_value: 1
+              max_value: 10000
+      - name: email
+        tests:
+          - dbt_dqscore.valid_email
+          - dbt_dqscore.not_empty_string
+          - dbt_dqscore.no_leading_trailing_whitespace
+          - dbt_dqscore.string_length:
+              min_len: 5
+              max_len: 100
+          - dbt_dqscore.matches_regex:
+              pattern: '^[a-z]+@example[.]com$'
+      - name: age
+        tests:
+          - dbt_dqscore.in_range:
+              min_value: 0
+              max_value: 120
+          - dbt_dqscore.no_outliers_zscore:
+              sigma: 4.0
+          - dbt_dqscore.aggregate_in_range:
+              aggregation: avg
+              min_value: 18
+              max_value: 90
+      - name: country
+        tests:
+          - dbt_dqscore.in_set:
+              values: ['US', 'CA', 'MX']
+          # intentional warn: exercises ROW-LEVEL scoring (2 of 8 rows fail -> 0.75)
+          - dbt_dqscore.in_set:
+              values: ['US', 'CA']
+              config:
+                severity: warn
+          - dbt_dqscore.not_in_set:
+              values: ['XX', 'ZZ']
+          - dbt_dqscore.not_constant
+      - name: signup_date
+        tests:
+          - dbt_dqscore.no_future_dates
+          - dbt_dqscore.no_date_gaps:
+              datepart: day
+              max_gap: 1
+          - dbt_dqscore.recency:
+              datepart: day
+              interval: 36500
+      - name: lifetime_value
+        tests:
+          - dbt_dqscore.in_range:
+              min_value: 0
+      - name: status
+        tests:
+          - dbt_dqscore.value_share:
+              value: inactive
+              max_share: 0.5
+          # intentional warn: exercises BINARY scoring (0.5 credit)
+          - dbt_dqscore.value_share:
+              value: inactive
+              max_share: 0.1
+              config:
+                severity: warn
+
+
+  - name: seed_orders
+    config:
+      column_types:
+        amount_text: varchar
+    tests:
+      - dbt_dqscore.unique_combination:
+          combination_of_columns: [order_id, customer_id]
+      - dbt_dqscore.row_count_ratio:
+          compare_model: ref('seed_customers')
+          min_ratio: 1.0
+          max_ratio: 5.0
+      - dbt_dqscore.expression_is_true:
+          expression: "amount > 0"
+    columns:
+      - name: order_id
+        tests:
+          - dbt_dqscore.monotonically_increasing:
+              sort_column: order_date
+              strictly: true
+      - name: customer_id
+        tests:
+          - dbt_dqscore.relationship_proportion:
+              to: ref('seed_customers')
+              field: customer_id
+              at_least: 1.0
+          - dbt_dqscore.cardinality_equal:
+              to: ref('seed_customers')
+              field: customer_id
+      - name: amount
+        tests:
+          - dbt_dqscore.in_range:
+              min_value: 0
+              max_value: 10000
+      - name: amount_text
+        tests:
+          - dbt_dqscore.parses_as_numeric
+
+
+  # ------------------------------------------------------------------------
+  # Negative-path suite: every inverted test MUST find failures.
+  # error_if: '=0' means CI fails when the dqscore test returns zero bad
+  # rows (i.e. when it failed to catch the planted bug).
+  # ------------------------------------------------------------------------
+  - name: seed_bad_rows
+    config:
+      column_types:
+        amount_text: varchar
+        left_ts: date
+        right_ts: date
+    tests:
+      - dbt_dqscore.column_pair_compare:
+          left_column: left_ts
+          right_column: right_ts
+          operator: '<='
+          config:
+            error_if: '=0'
+            warn_if: '<0'
+            meta:
+              dqscore_exclude: true
+      - dbt_dqscore.expression_is_true:
+          expression: "status = 'good'"
+          config:
+            error_if: '=0'
+            warn_if: '<0'
+            meta:
+              dqscore_exclude: true
+      - dbt_dqscore.row_count_equal:
+          value: 999
+          config:
+            error_if: '=0'
+            warn_if: '<0'
+            meta:
+              dqscore_exclude: true
+    columns:
+      - name: email
+        tests:
+          - dbt_dqscore.valid_email:
+              config:
+                error_if: '=0'
+                warn_if: '<0'
+                meta:
+                  dqscore_exclude: true
+          - dbt_dqscore.matches_regex:
+              pattern: '^[a-z]+@example[.]com$'
+              config:
+                error_if: '=0'
+                warn_if: '<0'
+                meta:
+                  dqscore_exclude: true
+      - name: age
+        tests:
+          - dbt_dqscore.in_range:
+              min_value: 0
+              max_value: 120
+              config:
+                error_if: '=0'
+                warn_if: '<0'
+                meta:
+                  dqscore_exclude: true
+      - name: country
+        tests:
+          - dbt_dqscore.in_set:
+              values: ['US', 'CA', 'MX']
+              config:
+                error_if: '=0'
+                warn_if: '<0'
+                meta:
+                  dqscore_exclude: true
+          - dbt_dqscore.not_in_set:
+              values: ['XX', 'ZZ']
+              config:
+                error_if: '=0'
+                warn_if: '<0'
+                meta:
+                  dqscore_exclude: true
+      - name: amount_text
+        tests:
+          - dbt_dqscore.parses_as_numeric:
+              config:
+                error_if: '=0'
+                warn_if: '<0'
+                meta:
+                  dqscore_exclude: true
