@@ -28,7 +28,7 @@ Unlike naive pass-rate metrics, the score is:
 - **CI gate.** Optionally fail the invocation when the score drops below a
   threshold, even if every individual test is only severity `warn`.
 
-The package also includes 27 generic data quality tests for counts, statistics,
+The package also includes 29 generic data quality tests for counts, statistics,
 freshness, tolerant referential integrity, and free-form expressions.
 
 ## Installation
@@ -220,7 +220,7 @@ can coexist in the same project.
 
 ## Bundled tests
 
-27 generic tests, referenced as `dbt_dqscore.<name>`. All support standard dbt
+29 generic tests, referenced as `dbt_dqscore.<name>`. All support standard dbt
 test configs (`severity`, `where`, `error_if`, ...). "Nulls pass" means null
 values are ignored; pair with `not_null` to enforce presence.
 
@@ -233,11 +233,13 @@ work on dbt 1.3-1.11.
 | Test | Fails when... | Key args |
 |---|---|---|
 | `not_null_proportion` | share of non-null rows < `at_least` | `at_least` (0-1) |
+| `proportion_in_range` | share of non-null rows in range < `at_least` | `at_least`, `min_value`, `max_value`, `inclusive` |
 | `in_range` | value outside bounds (nulls pass) | `min_value`, `max_value`, `inclusive` |
 | `in_set` | value not in allowed list (nulls pass) | `values`, `quote` |
 | `not_in_set` | value in forbidden list | `values`, `quote` |
 | `not_constant` | column has <= 1 distinct value in a non-empty table | `group_by` |
 | `expression_is_true` | row where SQL `expression` is not true (nulls fail) | `expression` |
+| `required_if` | column is null while SQL `condition` is true | `condition` |
 | `column_pair_compare` | `left_column` and `right_column` violate `operator` | `left_column`, `right_column`, `operator` |
 
 ### Strings
@@ -311,6 +313,16 @@ columns:
           to: ref('dim_customers')
           field: customer_id
           at_least: 0.99
+```
+
+`required_if` example:
+
+```yaml
+columns:
+  - name: cancelled_at
+    tests:
+      - dbt_dqscore.required_if:
+          condition: "status = 'cancelled'"
 ```
 
 `expression_is_true` / `column_pair_compare` examples:

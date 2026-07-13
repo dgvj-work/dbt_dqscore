@@ -32,6 +32,8 @@ seeds:
               max_value: 10000
       - name: email
         tests:
+          - dbt_dqscore.required_if:
+              condition: "status = 'active'"
           - dbt_dqscore.valid_email
           - dbt_dqscore.not_empty_string
           - dbt_dqscore.no_leading_trailing_whitespace
@@ -43,6 +45,10 @@ seeds:
       - name: age
         tests:
           - dbt_dqscore.in_range:
+              min_value: 0
+              max_value: 120
+          - dbt_dqscore.proportion_in_range:
+              at_least: 1.0
               min_value: 0
               max_value: 120
           - dbt_dqscore.no_outliers_zscore:
@@ -122,6 +128,10 @@ seeds:
           - dbt_dqscore.in_range:
               min_value: 0
               max_value: 10000
+      - name: order_date
+        tests:
+          - dbt_dqscore.required_if:
+              condition: "amount > 0"
       - name: amount_text
         tests:
           - dbt_dqscore.parses_as_numeric
@@ -179,6 +189,24 @@ seeds:
           - dbt_dqscore.in_range:
               min_value: 0
               max_value: 120
+              config:
+                error_if: '=0'
+                warn_if: '<0'
+                meta:
+                  dqscore_exclude: true
+          - dbt_dqscore.proportion_in_range:
+              at_least: 0.5
+              min_value: 0
+              max_value: 120
+              config:
+                error_if: '=0'
+                warn_if: '<0'
+                meta:
+                  dqscore_exclude: true
+      - name: cancel_reason
+        tests:
+          - dbt_dqscore.required_if:
+              condition: "status = 'bad'"
               config:
                 error_if: '=0'
                 warn_if: '<0'

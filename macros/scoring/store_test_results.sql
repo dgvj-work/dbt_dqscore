@@ -67,7 +67,7 @@
         'valid_email', 'no_future_dates', 'no_outliers_zscore',
         'monotonically_increasing', 'sequential_values', 'no_date_gaps',
         'no_duplicate_rows', 'unique_combination',
-        'expression_is_true', 'column_pair_compare'
+        'expression_is_true', 'column_pair_compare', 'required_if'
     ] -%}
     {%- set row_level_tests = row_level_defaults + cfg.get('row_level_tests', []) -%}
     {%- set binary_overrides = cfg.get('binary_tests', []) -%}

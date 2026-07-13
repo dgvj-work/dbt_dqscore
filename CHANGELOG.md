@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 (unreleased)
+
+- Add `required_if` generic test (conditional null checks)
+- Add `proportion_in_range` generic test (tolerant range compliance rate)
+
 ## 0.1.0
 
 Initial release.
