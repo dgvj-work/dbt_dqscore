@@ -36,4 +36,6 @@ jobs:
         env:
           DBT_PROFILES_DIR: .
         # Disable the hook so this pass does not overwrite the happy-path scores.
-        run: dbt test --select tag:assert_scoring --vars '{dqscore: {enabled: false}}'
+        run: >
+          dbt test --select tag:assert_scoring
+          --vars "{\"dqscore\": {\"enabled\": false}}"
