@@ -1,7 +1,6 @@
 # Contributing to dbt_dqscore
 
-Thanks for your interest! Bug reports, adapter fixes, new tests, and docs
-improvements are all welcome.
+Bug reports, adapter fixes, new tests, and docs improvements are welcome.
 
 ## Development setup
 
@@ -14,15 +13,15 @@ dbt test --exclude tag:assert_scoring
 dbt test --select tag:assert_scoring --vars '{dqscore: {enabled: false}}'
 ```
 
-The suite must finish green (warn-severity tests are intentional — they exercise
-the scoring engine), log a `dqscore: quality score` line, and pass the
-`tag:assert_scoring` singular tests.
+The suite must finish green. Some tests use `severity: warn` on purpose to
+exercise the scoring engine. The run should log a `dqscore: quality score` line
+and pass the `tag:assert_scoring` singular tests.
 
 ## Adding a generic test
 
 1. Add the `{% test ... %}` macro under `macros/generic_tests/` (thematic file).
 2. Nulls should pass unless the test is explicitly about nulls.
-3. Use dbt Core cross-database macros (`dbt.length`, `dbt.dateadd`, ...) — no
+3. Use dbt Core cross-database macros (`dbt.length`, `dbt.dateadd`, ...). No
    adapter-specific SQL outside dispatch macros.
 4. If the test returns one row per bad source row, add its name to the
    `row_level_defaults` list in `macros/scoring/store_test_results.sql`.

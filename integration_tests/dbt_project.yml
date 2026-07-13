@@ -14,7 +14,7 @@ vars:
   dqscore:
     retention_days: 30
     default_weight: 1
-    # fail_below deliberately below the expected score so CI passes:
+    # fail_below set low so CI passes with warn-severity tests
     fail_below: 50
 
 on-run-end:

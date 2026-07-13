@@ -2,9 +2,8 @@
     Cross-database regex predicate. Returns a boolean SQL expression that is
     true when `column` matches `pattern`.
 
-    Tip for portable patterns: prefer character classes over backslash
-    escapes (e.g. `[.]` instead of `\.`) so the same pattern works on
-    Snowflake, BigQuery, Postgres, Redshift, Databricks and DuckDB.
+    For portable patterns, prefer character classes over backslash
+    escapes (e.g. `[.]` instead of `\.`).
 -#}
 
 {% macro dqscore_regexp_match(column, pattern) %}

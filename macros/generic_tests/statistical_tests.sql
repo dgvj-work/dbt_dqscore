@@ -86,7 +86,7 @@ where previous_value is not null
 
 
 {#- Fails when consecutive values (ordered by the column) do not step by `interval`.
-    Great for gap-free surrogate keys or invoice numbers. Optional group_by (list). -#}
+    Optional group_by (list). -#}
 {% test sequential_values(model, column_name, interval=1, group_by=none) %}
 
 with lagged as (

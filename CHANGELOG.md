@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0 (unreleased)
+## 0.1.0
 
 Initial release.
 
@@ -17,5 +17,4 @@ Initial release.
   `column_pair_compare`
 - Cross-database regex dispatch macro (quote-safe patterns)
 - Quote-safe value lists for `in_set` / `not_in_set` / `value_share`
-- DuckDB integration suite: happy path, inverted negative path, scoring math
-  assertions + GitHub Actions CI
+- DuckDB integration suite with scoring assertions and GitHub Actions CI

@@ -55,7 +55,7 @@ seeds:
         tests:
           - dbt_dqscore.in_set:
               values: ['US', 'CA', 'MX']
-          # intentional warn: exercises ROW-LEVEL scoring (2 of 8 rows fail -> 0.75)
+          # warn severity: row-mode scoring (2 of 8 rows fail -> 0.75)
           - dbt_dqscore.in_set:
               values: ['US', 'CA']
               config:
@@ -81,7 +81,7 @@ seeds:
           - dbt_dqscore.value_share:
               value: inactive
               max_share: 0.5
-          # intentional warn: exercises BINARY scoring (0.5 credit)
+          # warn severity: binary-mode scoring (0.5 credit)
           - dbt_dqscore.value_share:
               value: inactive
               max_share: 0.1
@@ -127,11 +127,7 @@ seeds:
           - dbt_dqscore.parses_as_numeric
 
 
-  # ------------------------------------------------------------------------
-  # Negative-path suite: every inverted test MUST find failures.
-  # error_if: '=0' means CI fails when the dqscore test returns zero bad
-  # rows (i.e. when it failed to catch the planted bug).
-  # ------------------------------------------------------------------------
+  # Bad-row seed: inverted tests with error_if: '=0' and dqscore_exclude.
   - name: seed_bad_rows
     config:
       column_types:

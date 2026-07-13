@@ -33,6 +33,6 @@ where quality_score < 90
 union all
 
 select
-    'expected at least one warn status in the happy-path suite' as error
+    'expected at least one warn status in the clean seed suite' as error
 from latest
 where warned < 1
