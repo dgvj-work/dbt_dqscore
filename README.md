@@ -44,12 +44,12 @@ packages:
 dbt deps
 ```
 
-Until the package is on hub.getdbt.com, install from git (pin a tag, not a branch):
+Install from git while waiting for hub.getdbt.com indexing (pin a tag, not a branch):
 
 ```yaml
 packages:
   - git: "https://github.com/dgvj-work/dbt_dqscore.git"
-    revision: 0.1.0
+    revision: 0.1.1
 ```
 
 Compatibility: dbt Core and the dbt Fusion engine, `require-dbt-version: [">=1.3.0", "<3.0.0"]`.
@@ -400,15 +400,9 @@ Requires `pip install dbt-duckdb`. CI runs this suite on every push.
 
 ## Publishing to dbt Hub
 
-To list the package on [hub.getdbt.com](https://hub.getdbt.com), open a PR on
-[dbt-labs/hubcap](https://github.com/dbt-labs/hubcap) adding
-`dgvj-work/dbt_dqscore` to `hub.json`. Requirements:
-
-1. Public GitHub repo with an open-source `LICENSE` (MIT).
-2. Root `dbt_project.yml` with `name:` and `require-dbt-version`.
-3. Semver GitHub releases/tags (`0.1.0` or `v0.1.0`, not `latest`).
-
-After the hubcap PR merges, new releases are indexed automatically.
+Listed on [hub.getdbt.com](https://hub.getdbt.com/dgvj-work/dbt_dqscore/latest/) after
+registration in [dbt-labs/hubcap](https://github.com/dbt-labs/hubcap). New semver
+releases are indexed automatically once registered.
 
 ## Contributing
 
